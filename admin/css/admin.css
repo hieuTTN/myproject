@@ -1,0 +1,232 @@
+/* ============================================================
+   ADMIN — STYLE DÙNG CHUNG (dashboard, project_add, technology,...)
+   Mọi trang admin chỉ cần link file này, không cần copy lại
+   khối <style> giống nhau ở từng file .php nữa.
+   ============================================================ */
+:root {
+    --bg-dark: #0b0f19;
+    --bg-surface: #131a26;
+    --bg-surface-2: #1e293b;
+    --accent-teal: #34d1bf;
+    --text-muted: #94a3b8;
+    --sidebar-w: 260px;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: #ffffff;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.text-teal { color: var(--accent-teal); }
+
+.card-custom {
+    background-color: var(--bg-surface);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.table-custom { color: #ffffff; vertical-align: middle; }
+.table-custom th {
+    background-color: var(--bg-surface-2);
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+.table-custom td {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1rem 0.75rem;
+}
+
+.btn-teal { background-color: var(--accent-teal); color: #0b0f19; font-weight: 600; border: none; }
+.btn-teal:hover { background-color: #2bc1af; color: #0b0f19; }
+
+.form-label { font-size: 0.875rem; font-weight: 500; color: var(--text-muted); }
+.form-control, .form-select {
+    background-color: var(--bg-surface-2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-surface-2);
+    border-color: var(--accent-teal);
+    color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(52, 209, 191, 0.15);
+}
+.form-check-label { color: #fff; }
+
+.tech-box {
+    background-color: var(--bg-surface-2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* Đồng bộ giao diện Dark Mode cho TinyMCE (dùng ở project_add.php) */
+.tox-tinymce { border-radius: 8px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; }
+
+
+/* ============================================================
+   LAYOUT: SIDEBAR + NỘI DUNG
+   ============================================================ */
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- Sidebar --- */
+.admin-sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background-color: var(--bg-surface);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 16px;
+    transition: transform 0.3s ease;
+}
+
+.admin-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 6px 10px 22px;
+    font-size: 1.05rem;
+}
+.admin-sidebar__brand i { font-size: 1.3rem; }
+
+.admin-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+    transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+.admin-nav-link i { font-size: 1.05rem; width: 20px; text-align: center; }
+
+.admin-nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+}
+.admin-nav-link.is-active {
+    background-color: rgba(52, 209, 191, 0.1);
+    color: var(--accent-teal);
+    border-left-color: var(--accent-teal);
+}
+
+.admin-sidebar__footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 16px;
+    margin-top: 12px;
+}
+.admin-sidebar__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    padding: 0 10px 12px;
+}
+.admin-sidebar__user i { font-size: 1.3rem; }
+.admin-sidebar__user span { color: #fff; font-weight: 600; }
+
+.admin-sidebar__logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: #f87171;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color .2s ease;
+}
+.admin-sidebar__logout:hover { background-color: rgba(248, 113, 113, 0.1); color: #f87171; }
+
+/* --- Nội dung bên phải sidebar --- */
+.admin-content {
+    flex: 1;
+    min-width: 0;
+    margin-left: var(--sidebar-w);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.admin-topbar {
+    display: none; /* chỉ hiện trên mobile/tablet, xem media query bên dưới */
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+.admin-topbar__brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+
+.admin-sidebar-toggle {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 1040;
+}
+
+.admin-main {
+    flex: 1;
+    padding: 2.5rem 0;
+}
+
+/* --- Responsive: sidebar off-canvas dưới 992px --- */
+@media (max-width: 991.98px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+    }
+    .admin-sidebar.is-open {
+        transform: translateX(0);
+        box-shadow: 20px 0 60px -20px rgba(0,0,0,.6);
+    }
+    .admin-content { margin-left: 0; }
+    .admin-topbar { display: flex; }
+    body.admin-sidebar-open .admin-sidebar-overlay { display: block; }
+}
