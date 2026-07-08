@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
     header('Content-Type: application/json; charset=UTF-8');
 
     // Kiểm tra đồ án có tồn tại không
-    $existing = querySingleResult("SELECT id FROM `projects` WHERE id = $project_id");
+    $existing = querySingleResult("SELECT id, banner FROM `projects` WHERE id = $project_id");
     if (empty($existing)) {
         echo json_encode(["status" => "error", "message" => "Không tìm thấy đồ án cần sửa!"]);
         exit;
@@ -52,12 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
     // Nhận dữ liệu text từ $_POST tiêu chuẩn
     $title = trim($_POST['title'] ?? '');
     $category_id = trim($_POST['category_id'] ?? '');
+    $is_featured = (isset($_POST['is_featured']) && $_POST['is_featured'] == '1') ? 1 : 0;
     $description = trim($_POST['description'] ?? '');
     $youtube_id = trim($_POST['youtube_id'] ?? '');
     $drive_link = trim($_POST['drive_link'] ?? '');
     $tech_ids = $_POST['tech_ids'] ?? [];
     $delete_image_ids = $_POST['delete_images'] ?? [];
     $featured_selection = trim($_POST['featured_image'] ?? ''); // "existing_<id>" hoặc "new_<index>"
+    $remove_banner = (isset($_POST['remove_banner']) && $_POST['remove_banner'] == '1');
 
     if (empty($title)) {
         echo json_encode(["status" => "error", "message" => "Vui lòng nhập tên đồ án!"]);
@@ -111,6 +113,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
         }
     }
 
+
+    // BƯỚC 2b: Xử lý banner (ảnh đại diện lớn của đồ án)
+    $old_banner = $existing['banner'] ?? null;
+    $db_banner = $old_banner ? "'" . addslashes($old_banner) . "'" : 'NULL'; // Mặc định giữ nguyên banner cũ
+
+    if (!empty($_FILES['bannerFile']['name'])) {
+        $bannerFilesArray = [
+            'name'     => [$_FILES['bannerFile']['name']],
+            'type'     => [$_FILES['bannerFile']['type']],
+            'tmp_name' => [$_FILES['bannerFile']['tmp_name']],
+            'error'    => [$_FILES['bannerFile']['error']],
+            'size'     => [$_FILES['bannerFile']['size']],
+        ];
+        $bannerUploadResults = cloudinaryUploadFilesConcurrently(
+            $bannerFilesArray,
+            $cloudinaryCloudName,
+            $cloudinaryApiKey,
+            $cloudinaryApiSecret,
+            $uploadFolder,
+            ['project_banner']
+        );
+        if (!empty($bannerUploadResults[0]['success'])) {
+            // Xóa banner cũ trên Cloudinary (nếu có) để tránh rác file
+            if (!empty($old_banner)) {
+                $old_banner_public_id = getCloudinaryPublicId($old_banner);
+                if ($old_banner_public_id) {
+                    try { $cloudinary->uploadApi()->destroy($old_banner_public_id); } catch (Exception $e) {}
+                }
+            }
+            $db_banner = "'" . addslashes($bannerUploadResults[0]['secure_url']) . "'";
+        } else {
+            $upload_errors[] = "Lỗi upload banner: " . $bannerUploadResults[0]['error'];
+        }
+    } elseif ($remove_banner) {
+        if (!empty($old_banner)) {
+            $old_banner_public_id = getCloudinaryPublicId($old_banner);
+            if ($old_banner_public_id) {
+                try { $cloudinary->uploadApi()->destroy($old_banner_public_id); } catch (Exception $e) {}
+            }
+        }
+        $db_banner = 'NULL';
+    }
+
     // BƯỚC 3: Cập nhật thông tin chính của đồ án
     $safe_title = addslashes($title);
     $safe_description = addslashes($description);
@@ -123,7 +168,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
                 `title` = '$safe_title',
                 `description` = '$safe_description',
                 `youtube_id` = '$safe_youtube_id',
-                `drive_link` = '$safe_drive_link'
+                `drive_link` = '$safe_drive_link',
+                `is_featured` = $is_featured,
+                `banner` = $db_banner
              WHERE `id` = $project_id");
 
     // BƯỚC 4: Cập nhật lại danh sách công nghệ (xóa hết rồi thêm lại theo lựa chọn mới)
@@ -259,11 +306,11 @@ $technologies = executeresult("SELECT * FROM `technologies` ORDER BY `name` ASC"
     <form id="editProjectForm">
         <div class="card card-custom p-4 mb-4">
             <div class="row">
-                <div class="col-md-8 mb-3">
+                <div class="col-md-8">
                     <label for="title" class="form-label">Tên đồ án <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="title" required value="<?= htmlspecialchars($project['title']) ?>">
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-4">
                     <label for="category_id" class="form-label">Danh mục chính</label>
                     <select class="form-select" id="category_id">
                         <option value="">-- Chọn danh mục --</option>
@@ -273,6 +320,16 @@ $technologies = executeresult("SELECT * FROM `technologies` ORDER BY `name` ASC"
                             </option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label class="form-label d-block">&ThinSpace;</label>
+                    <div class="form-check form-switch fs-5">
+                        <input class="form-check-input" type="checkbox" role="switch" id="is_featured" name="is_featured" value="1"
+                            <?= ($project['is_featured'] == 1) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="is_featured" id="toggle-label">
+                            Đồ án nổi bật
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -290,6 +347,24 @@ $technologies = executeresult("SELECT * FROM `technologies` ORDER BY `name` ASC"
                 <div class="col-md-6 mb-3">
                     <label for="drive_link" class="form-label">Đường dẫn Google Drive (Source code / Tài liệu)</label>
                     <input type="url" class="form-control" id="drive_link" placeholder="https://drive.google.com/..." value="<?= htmlspecialchars($project['drive_link'] ?? '') ?>">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="bannerFile" class="form-label">Ảnh banner đại diện (hiển thị đầu trang)</label>
+                    <?php if (!empty($project['banner'])): ?>
+                        <div class="mb-2">
+                            <img src="<?= htmlspecialchars($project['banner']) ?>" alt="Banner hiện tại"
+                                 style="max-width:220px;max-height:130px;border-radius:6px;object-fit:cover;">
+                            <div class="form-check mt-1">
+                                <input class="form-check-input" type="checkbox" id="remove_banner" value="1">
+                                <label class="form-check-label small text-danger" for="remove_banner">Xóa banner hiện tại</label>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                    <input class="form-control" type="file" id="bannerFile" accept="image/*">
+                    <div class="mt-2" id="bannerPreview"></div>
                 </div>
             </div>
 
@@ -379,6 +454,20 @@ tinymce.init({
     placeholder: 'Nhập nội dung mô tả đồ án chi tiết tại đây...'
 });
 
+// Xem trước ảnh banner mới khi chọn
+document.getElementById('bannerFile').addEventListener('change', function () {
+    const preview = document.getElementById('bannerPreview');
+    preview.innerHTML = '';
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width:220px;max-height:130px;border-radius:6px;object-fit:cover;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
 // 2. Xem trước các ảnh mới được chọn + gắn radio "Đại diện" cho từng ảnh mới
 const fileInput = document.getElementById('imageFiles');
 const newImagesContainer = document.getElementById('newImagesContainer');
@@ -427,6 +516,8 @@ document.getElementById('editProjectForm').addEventListener('submit', async func
         formData.append('description', tinymce.get('description').getContent());
         formData.append('youtube_id', document.getElementById('youtube_id').value);
         formData.append('drive_link', document.getElementById('drive_link').value);
+        const isFeatured = document.getElementById('is_featured').checked ? 1 : 0;
+        formData.append('is_featured', isFeatured);
 
         // Công nghệ được chọn
         document.querySelectorAll('.tech-checkbox:checked').forEach(cb => {
@@ -450,6 +541,16 @@ document.getElementById('editProjectForm').addEventListener('submit', async func
             formData.append('imageFiles[]', files[i]);
         }
 
+        // Ảnh banner đại diện
+        const bannerFile = document.getElementById('bannerFile').files[0];
+        if (bannerFile) {
+            formData.append('bannerFile', bannerFile);
+        }
+        const removeBannerCheckbox = document.getElementById('remove_banner');
+        if (removeBannerCheckbox && removeBannerCheckbox.checked) {
+            formData.append('remove_banner', '1');
+        }
+        
         const response = await fetch(`project_edit.php?id=${PROJECT_ID}&api=save`, {
             method: 'POST',
             body: formData

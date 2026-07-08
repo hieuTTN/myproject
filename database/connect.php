@@ -3,21 +3,24 @@ require_once('config.php');
 
 // insert, update, delete,
 function execute($sql){
-	$conn = mysqli_connect(HOST, USERNAME, PASSWORD, DATABASE) or die("connect fail");
-	mysqli_query($conn, $sql);
+    $conn = mysqli_connect(HOST, USERNAME, PASSWORD, DATABASE) or die("connect fail");
+    mysqli_set_charset($conn, "utf8mb4"); // SỬA LỖI FONT TẠI ĐÂY
+    mysqli_query($conn, $sql);
 }
 
 function insert($sql){
-	$conn = mysqli_connect(HOST, USERNAME, PASSWORD, DATABASE) or die("connect fail");
-	mysqli_query($conn , $sql);
-	$id = mysqli_insert_id($conn);
-	return $id;
+    $conn = mysqli_connect(HOST, USERNAME, PASSWORD, DATABASE) or die("connect fail");
+    mysqli_set_charset($conn, "utf8mb4"); // SỬA LỖI FONT TẠI ĐÂY
+    mysqli_query($conn , $sql);
+    $id = mysqli_insert_id($conn);
+    return $id;
 }
 
 // thực hiện câu select 
 function executeresult($sql) {
     // 1. Kết nối như bình thường
     $conn = mysqli_connect(HOST, USERNAME, PASSWORD, DATABASE) or die("connect fail");
+    mysqli_set_charset($conn, "utf8mb4"); // SỬA LỖI FONT TẠI ĐÂY
     
     $List = [];
 
@@ -50,9 +53,10 @@ function executeresult($sql) {
 }
 
 function querySingleResult($sql){
-	$conn = mysqli_connect(HOST, USERNAME, PASSWORD, DATABASE) or die("connect fail");
-	$result = mysqli_query($conn, $sql);
-	$data = mysqli_fetch_assoc($result);
-	return $data;
+    $conn = mysqli_connect(HOST, USERNAME, PASSWORD, DATABASE) or die("connect fail");
+    mysqli_set_charset($conn, "utf8mb4"); // SỬA LỖI FONT TẠI ĐÂY
+    $result = mysqli_query($conn, $sql);
+    $data = mysqli_fetch_assoc($result);
+    return $data;
 }
 ?>

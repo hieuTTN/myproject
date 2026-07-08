@@ -176,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
     
     <div class="text-center mt-4">
-        <a href="index.html" class="text-decoration-none small" style="color: var(--text-muted);"><i class="bi bi-arrow-left me-1"></i> Quay lại trang chủ</a>
+        <a href="/" class="text-decoration-none small" style="color: var(--text-muted);"><i class="bi bi-arrow-left me-1"></i> Quay lại trang chủ</a>
     </div>
 </div>
 

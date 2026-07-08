@@ -1,5 +1,20 @@
 <?php
 // upload.php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+header('Content-Type: application/json');
+
+// Kiểm tra quyền truy cập admin — chặn upload nếu chưa đăng nhập
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Bạn cần đăng nhập admin để thực hiện thao tác này.',
+    ]);
+    exit;
+}
 require_once 'config/config.php';
 
 header('Content-Type: application/json');

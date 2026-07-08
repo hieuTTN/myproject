@@ -1,5 +1,5 @@
 /* ==========================================================================
-   DEVHIRE — CODE THUÊ ĐỒ ÁN
+   HieuDev — CODE THUÊ ĐỒ ÁN
    Design tokens
    ========================================================================== */
 :root{
@@ -265,7 +265,10 @@ main,footer,header{position:relative;z-index:1;}
   border-right:1px solid var(--border-subtle);text-align:right;
 }
 .ide__code{
-  margin:0;padding:0 20px;font-family:var(--font-mono);font-size:.86rem;line-height:1.7;
+  margin:0;padding:0 20px;
+  font-family:var(--font-mono);
+  font-size:.86rem;
+  line-height:1.7;
   color:var(--text-primary);white-space:pre-wrap;flex:1;
 }
 .ide__cursor{display:inline-block;width:7px;height:16px;background:var(--accent-teal);vertical-align:middle;animation:blink 1s step-end infinite;}
@@ -308,7 +311,7 @@ main,footer,header{position:relative;z-index:1;}
 /* ==========================================================================
    SECTION GENERIC
    ========================================================================== */
-.section{padding:110px 0;}
+.section{padding:80px 0 30px 0;}
 .section--alt{background:linear-gradient(180deg,transparent,rgba(255,255,255,.015) 15%,rgba(255,255,255,.015) 85%,transparent);}
 .section-head{max-width:640px;margin-bottom:56px;}
 .section-tag{
@@ -327,7 +330,7 @@ main,footer,header{position:relative;z-index:1;}
 }
 @media (max-width:1199.98px){.tech-grid{grid-template-columns:repeat(3,1fr);}}
 @media (max-width:767.98px){.tech-grid{grid-template-columns:repeat(2,1fr);}}
-@media (max-width:479.98px){.tech-grid{grid-template-columns:1fr;}}
+@media (max-width:479.98px){.tech-grid{grid-template-columns:2,1fr;}}
 
 .tech-card{
   background:var(--bg-surface);border:1px solid var(--border-subtle);
@@ -668,5 +671,535 @@ main,footer,header{position:relative;z-index:1;}
   }
   .demo-card__techs {
     min-height: auto;
+  }
+}
+
+/* ==========================================================================
+   PROJECT DETAIL MODAL
+   ========================================================================== */
+
+/* Backdrop tối hơn cho hợp với theme */
+.modal-backdrop.show{
+  opacity:.75;
+  background:var(--bg-deep);
+}
+
+/* Khung modal */
+.project-modal{
+  background:var(--bg-surface);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-glow);
+  color:var(--text-primary);
+}
+
+/* Modal dialog: cho nó "nổi" nhẹ như các card khác */
+#projectModal .modal-dialog{
+  --bs-modal-width:760px;
+}
+
+/* Header */
+.project-modal .modal-header{
+  border-bottom:1px solid var(--border-subtle);
+  padding:22px 26px;
+  background:linear-gradient(180deg,rgba(124,92,252,.06),transparent);
+}
+.project-modal .modal-title{
+  font-family:var(--font-display);
+  font-size:1.3rem;
+  font-weight:700;
+  color:#fff;
+  line-height:1.35;
+  padding-right:16px;
+}
+.project-modal .btn-close{
+  opacity:.7;
+  filter:brightness(0) invert(1);
+  transition:opacity .2s ease,transform .2s ease;
+}
+.project-modal .btn-close:hover{
+  opacity:1;
+  transform:rotate(90deg);
+}
+.project-modal .btn-close:focus{
+  box-shadow:0 0 0 3px rgba(124,92,252,.35);
+}
+
+/* Body */
+.project-modal .modal-body{
+  padding:26px;
+}
+
+/* Video wrap (iframe YouTube) */
+#projectModalVideoWrap{
+  border-radius:var(--radius-md);
+  overflow:hidden;
+  border:1px solid var(--border-subtle);
+  background:var(--bg-deep);
+}
+#projectModalVideoWrap iframe{
+  border:0;
+}
+
+/* Khối công nghệ trong modal — dùng lại style tech-pill nhưng hơi to hơn cho dễ đọc */
+#projectModalTechs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+#projectModalTechs .tech-pill{
+  font-size:.78rem !important;
+  padding:6px 13px !important;
+}
+
+/* Mô tả HTML từ TinyMCE — style lại các thẻ p/ul/table... cho khớp theme tối */
+.project-modal__desc{
+  font-size:.95rem;
+  color:var(--text-muted);
+  line-height:1.75;
+  padding-top:6px;
+  border-top:1px solid var(--border-subtle);
+  margin-top:4px;
+}
+.project-modal__desc > *:first-child{margin-top:0;}
+.project-modal__desc p{
+  color:var(--text-muted);
+  margin:0 0 14px;
+}
+.project-modal__desc strong,
+.project-modal__desc b{
+  color:#fff;
+  font-weight:600;
+}
+.project-modal__desc em,
+.project-modal__desc i{
+  color:var(--text-primary);
+}
+.project-modal__desc a{
+  color:var(--accent-teal);
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
+.project-modal__desc a:hover{
+  color:var(--accent-violet);
+}
+.project-modal__desc ul,
+.project-modal__desc ol{
+  margin:0 0 16px;
+  padding-left:22px;
+  color:var(--text-muted);
+}
+.project-modal__desc li{
+  margin-bottom:6px;
+}
+.project-modal__desc li::marker{
+  color:var(--accent-teal);
+}
+.project-modal__desc h1,
+.project-modal__desc h2,
+.project-modal__desc h3,
+.project-modal__desc h4{
+  color:#fff;
+  font-size:1.05rem;
+  margin:20px 0 10px;
+}
+.project-modal__desc code{
+  font-family:var(--font-mono);
+  background:var(--bg-surface-3);
+  border:1px solid var(--border-subtle);
+  color:var(--accent-amber);
+  padding:2px 6px;
+  border-radius:5px;
+  font-size:.85em;
+}
+.project-modal__desc pre{
+  background:var(--bg-deep);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--radius-sm);
+  padding:14px 16px;
+  overflow-x:auto;
+  margin:0 0 16px;
+}
+.project-modal__desc pre code{
+  background:none;
+  border:none;
+  padding:0;
+  color:var(--text-primary);
+}
+.project-modal__desc table{
+  width:100%;
+  border-collapse:collapse;
+  margin:0 0 16px;
+  font-size:.88rem;
+}
+.project-modal__desc th,
+.project-modal__desc td{
+  border:1px solid var(--border-subtle);
+  padding:8px 12px;
+  text-align:left;
+}
+.project-modal__desc th{
+  background:var(--bg-surface-2);
+  color:#fff;
+  font-family:var(--font-mono);
+  font-size:.8rem;
+}
+.project-modal__desc blockquote{
+  border-left:3px solid var(--accent-violet);
+  padding:8px 16px;
+  margin:0 0 16px;
+  background:rgba(124,92,252,.06);
+  color:var(--text-primary);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+}
+.project-modal__desc img{
+  max-width:100%;
+  height:auto;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border-subtle);
+}
+
+/* Footer */
+.project-modal .modal-footer{
+  border-top:1px solid var(--border-subtle);
+  padding:18px 26px;
+  gap:10px;
+}
+.project-modal .modal-footer .btn-outline-ghost{
+  font-size:.88rem;
+  padding:10px 20px;
+}
+.project-modal .modal-footer .btn-outline-secondary{
+  border:1px solid var(--border-subtle);
+  color:var(--text-muted);
+  background:transparent;
+  font-size:.88rem;
+  padding:10px 20px;
+  border-radius:999px;
+  transition:all .25s ease;
+}
+.project-modal .modal-footer .btn-outline-secondary:hover{
+  color:#fff;
+  border-color:var(--border-strong);
+  background:rgba(255,255,255,.04);
+}
+
+/* Fade + scale nhẹ khi mở modal, đồng bộ với các animation khác trên site */
+#projectModal.modal.fade .modal-dialog{
+  transform:scale(.94) translateY(16px);
+  transition:transform .35s var(--ease),opacity .3s ease;
+}
+#projectModal.modal.show .modal-dialog{
+  transform:scale(1) translateY(0);
+}
+
+/* Responsive: mobile thu gọn padding */
+@media (max-width:575.98px){
+  .project-modal .modal-header,
+  .project-modal .modal-body,
+  .project-modal .modal-footer{
+    padding-left:18px;
+    padding-right:18px;
+  }
+  .project-modal .modal-title{
+    font-size:1.1rem;
+  }
+}
+
+@media (max-width:991.98px){
+  .ide__code{
+    min-height:320px; /* tùy chỉnh số này theo ý bạn, hiện tại đang không set nên co theo nội dung */
+  }
+}
+/* ==========================================================================
+   TRANG CHI TIẾT ĐỒ ÁN (project_detail.php)
+   Thêm đoạn này vào cuối file css/style.css
+   ========================================================================== */
+
+.project-detail__back{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family:var(--font-mono);
+  font-size:.85rem;
+  color:var(--text-muted);
+  transition:color .2s ease,transform .2s ease;
+}
+.project-detail__back:hover{
+  color:var(--accent-teal);
+  transform:translateX(-3px);
+}
+
+/* ===================== CỘT TRÁI: NỘI DUNG CHÍNH ===================== */
+.project-detail__main{
+  background:var(--bg-surface);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--radius-lg);
+  padding:32px;
+}
+@media (max-width:575.98px){
+  .project-detail__main{ padding:22px 18px; }
+}
+
+.project-detail__title{
+  font-size:clamp(1.5rem,3vw,2.1rem);
+  margin:14px 0 16px;
+  line-height:1.3;
+}
+
+.project-detail__techs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:24px;
+}
+.project-detail__techs .tech-pill{
+  font-size:.78rem;
+  padding:6px 13px;
+}
+
+/* Album ảnh demo (Bootstrap carousel) */
+.project-detail__gallery{
+  border-radius:var(--radius-md);
+  overflow:hidden;
+  border:1px solid var(--border-subtle);
+  background:var(--bg-deep);
+}
+.project-detail__gallery .carousel-item img{
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+  display:block;
+}
+.project-detail__gallery .carousel-control-prev,
+.project-detail__gallery .carousel-control-next{
+  width:52px;
+  opacity:0;
+  transition:opacity .25s ease;
+}
+.project-detail__gallery:hover .carousel-control-prev,
+.project-detail__gallery:hover .carousel-control-next{
+  opacity:1;
+}
+.project-detail__gallery .carousel-control-prev-icon,
+.project-detail__gallery .carousel-control-next-icon{
+  width:34px;
+  height:34px;
+  background-color:rgba(10,13,20,.55);
+  border-radius:50%;
+  padding:8px;
+  background-size:16px;
+}
+.project-detail__gallery .carousel-indicators{
+  margin-bottom:10px;
+}
+.project-detail__gallery .carousel-indicators [data-bs-target]{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  border:none;
+  background-color:rgba(255,255,255,.4);
+  opacity:1;
+}
+.project-detail__gallery .carousel-indicators .active{
+  background-color:var(--accent-teal);
+}
+
+/* Khung video YouTube */
+.project-detail__video{
+  border-radius:var(--radius-md);
+  overflow:hidden;
+  border:1px solid var(--border-subtle);
+  background:var(--bg-deep);
+  position:relative;
+}
+.project-detail__video iframe{
+  border:0;
+  position:absolute;
+  top:0;left:0;
+  width:100%;
+  height:100%;
+}
+
+/* ===================== CỘT PHẢI: SIDEBAR ĐỒ ÁN NỔI BẬT ===================== */
+.project-detail__sidebar{
+  background:var(--bg-surface);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--radius-lg);
+  padding:24px;
+  position:sticky;
+  top:calc(var(--header-h) + 24px);
+}
+@media (max-width:991.98px){
+  .project-detail__sidebar{ position:static; }
+}
+
+.project-detail__sidebar-title{
+  font-size:1.02rem;
+  margin-bottom:18px;
+  display:flex;
+  align-items:center;
+}
+.text-amber{ color:var(--accent-amber); }
+
+.related-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.related-item{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:8px;
+  border-radius:var(--radius-sm);
+  border:1px solid transparent;
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.related-item:hover{
+  background:var(--bg-surface-2);
+  border-color:var(--border-subtle);
+  transform:translateX(2px);
+}
+
+.related-item__thumb{
+  flex-shrink:0;
+  width:64px;
+  height:64px;
+  border-radius:10px;
+  overflow:hidden;
+  background:linear-gradient(135deg,rgba(124,92,252,.18),rgba(52,209,191,.12));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--accent-teal);
+  font-size:1.3rem;
+}
+.related-item__thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.related-item__body{
+  min-width:0;
+}
+.related-item__tag{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:.68rem;
+  color:var(--accent-teal);
+  margin-bottom:3px;
+}
+.related-item__title{
+  font-size:.86rem;
+  font-weight:600;
+  color:#fff;
+  line-height:1.4;
+  margin:0;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+
+/* ==========================================================================
+   BOTTOM NAVBAR (TELEGRAM STYLE FOR MOBILE)
+   ========================================================================== */
+@media (max-width: 991.98px) {
+  .all-projects-cl{
+    padding-top:10px !important;
+  }
+  .project-detail{
+    padding-top:10px !important;
+  }
+  #chatWidget{
+    display: none !important;
+  }
+  .hero{
+    position:relative;
+    padding:0 0 90px;
+  }
+  /* Ẩn header chính trên mobile */
+  #siteHeader {
+    display: none !important;
+  }
+  
+  /* Đẩy nội dung main xuống một chút nếu cần thiết, hoặc giữ nguyên tùy giao diện */
+  body {
+    padding-bottom: 90px; /* Tránh đè lên nội dung cuối trang */
+  }
+
+  /* Khung bao ngoài cố định ở đáy */
+  .bottom-nav {
+    position: fixed;
+    bottom: 20px; /* Cách đáy một khoảng tạo hiệu ứng floating */
+    left: 0;
+    width: 100%;
+    z-index: 1050; /* Nằm trên phần lớn nội dung nhưng dưới Modal backdrop */
+    padding: 0 16px;
+    pointer-events: none; /* Tránh cản trở click vùng ngoài viên thuốc */
+  }
+
+  /* Thiết kế viên thuốc */
+  .bottom-nav__wrapper {
+    pointer-events: auto; /* Kích hoạt lại click bên trong viên thuốc */
+    max-width: 480px;
+    margin: 0 auto;
+    background: rgba(21, 27, 43, 0.85); /* Đồng bộ tone màu trầm của bg-surface-2 */
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08); /* --border-subtle */
+    border-radius: 999px; /* Tạo hình viên thuốc hoàn chỉnh */
+    padding: 8px 14px;
+    display: table; /* Sử dụng Table thay cho Flex do hạn chế render */
+    width: 100%;
+    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.6), 
+                0 0 0 1px rgba(255, 255, 255, 0.02);
+  }
+
+  /* Từng phần tử item bên trong */
+  .bottom-nav__item {
+    display: table-cell;
+    width: 20%; /* Chia đều 5 cột */
+    text-align: center;
+    vertical-align: middle;
+    color: var(--text-muted);
+    transition: all 0.25s ease;
+    padding: 4px 0;
+  }
+
+  .bottom-nav__item i {
+    display: block;
+    font-size: 1.25rem;
+    margin-bottom: 2px;
+    transition: transform 0.2s ease;
+  }
+
+  .bottom-nav__item span {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 500;
+    font-family: var(--font-body);
+  }
+
+  /* Trạng thái Active hoặc Hover */
+  .bottom-nav__item:hover,
+  .bottom-nav__item.active {
+    color: var(--accent-teal); /* Hoặc dùng màu var(--accent-violet) tùy bạn thích */
+  }
+
+  .bottom-nav__item.active i {
+    transform: translateY(-2px); /* Nhấp nhô nhẹ khi được chọn */
+    color: var(--accent-teal);
+  }
+}
+
+/* Đảm bảo ẩn hoàn toàn trên màn hình máy tính */
+@media (min-width: 992px) {
+  .bottom-nav {
+    display: none !important;
   }
 }

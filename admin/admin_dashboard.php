@@ -106,6 +106,8 @@ $projects = executeresult($sql);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="css/admin.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/image/logo.jpg">
+    <link rel="shortcut icon" type="image/x-icon" href="/image/logo.jpg">
 </head>
 <body>
 
@@ -156,11 +158,13 @@ $projects = executeresult($sql);
                 <thead>
                     <tr>
                         <th style="width: 5%">ID</th>
+                        <th style="width: 15%">Banner</th>
                         <th style="width: 20%">Tên Đồ Án</th>
                         <th style="width: 15%">Danh Mục</th>
                         <th style="width: 20%">Công Nghệ</th> <!-- THÊM CỘT MỚI -->
                         <th style="width: 15%">Liên Kết</th>
                         <th style="width: 15%">Mô tả</th>
+                        <th style="width: 15%">Nổi bật</th>
                         <th style="width: 10%" class="text-end">Hành động</th>
                     </tr>
                 </thead>
@@ -179,6 +183,13 @@ $projects = executeresult($sql);
                         <?php foreach ($projects as $row): ?>
                             <tr>
                                 <td class="text-secondary fw-bold"><?= $row['id'] ?></td>
+                                <td>
+                                    <?php if (!empty($row['banner'])): ?>
+                                        <img src="<?= htmlspecialchars($row['banner']) ?>" alt="Banner" class="img-fluid rounded" style="max-height: 60px;">
+                                    <?php else: ?>
+                                        <span class="text-muted small">Chưa có</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <div class="fw-semibold text-white"><?= htmlspecialchars($row['title']) ?></div>
                                 </td>
@@ -207,7 +218,7 @@ $projects = executeresult($sql);
                                     <div class="small mb-1">
                                         <i class="bi bi-youtube text-danger me-1"></i>
                                         <span class="text-secondary">YouTube:</span> 
-                                        <code class="text-white"><?= htmlspecialchars($row['youtube_id'] ?: 'Trống') ?></code>
+                                        <code class="text-white linkyoutube"><?= htmlspecialchars($row['youtube_id'] ?: 'Trống') ?></code>
                                     </div>
                                     <div class="small">
                                         <i class="bi bi-cloud-arrow-down-fill text-primary me-1"></i>
@@ -223,6 +234,13 @@ $projects = executeresult($sql);
                                     <div class="text-secondary small text-truncate" style="max-width: 180px;">
                                          <?= strip_tags($row['description']) ?> <!-- Dùng strip_tags để lọc bỏ mã HTML từ TinyMCE khi hiển thị dạng rút gọn -->
                                     </div>
+                                </td>
+                                <td>
+                                    <?php if ($row['is_featured']): ?>
+                                        <span class="badge bg-success bg-opacity-20 border border-success text-white border-opacity-50 px-2 py-1">Có</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary bg-opacity-10 border border-secondary text-white border-opacity-20 px-2 py-1">Không</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-end">
                                     <a href="project_edit.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-warning mb-1 w-100">

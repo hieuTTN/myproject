@@ -1,61 +1,22 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hiếu trần - Code Thuê Đồ Án - Java, Spring Boot, .NET, PHP, React, Angular</title>
-<meta name="description" content="Nhận code thuê đồ án, luận văn, báo cáo thực tập đa nền tảng: Java, Spring Boot, Servlet, .NET, PHP Laravel, ReactJS, Angular, MySQL, SQL Server, Oracle.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-
-<!-- ===================== NOISE / BACKGROUND FX ===================== -->
-<div class="bg-fx" aria-hidden="true">
-  <div class="bg-fx__grid"></div>
-  <div class="bg-fx__glow bg-fx__glow--1"></div>
-  <div class="bg-fx__glow bg-fx__glow--2"></div>
-</div>
-
-<!-- ===================== HEADER (Bootstrap Navbar) ===================== -->
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top site-navbar" id="siteHeader">
-  <div class="container-xl">
-    <a href="#home" class="navbar-brand brand">
-      <span class="brand__bracket">&lt;/&gt;</span>
-      <span class="brand__text">DevHire<span class="brand__dot">.</span></span>
-    </a>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navCollapse"
-      aria-controls="navCollapse" aria-expanded="false" aria-label="Mở menu">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navCollapse">
-      <ul class="navbar-nav nav-tags mx-lg-auto my-3 my-lg-0" id="navTags">
-        <li class="nav-item"><a href="#home" class="nav-link nav-tag is-active" data-target="home">Trang chủ</a></li>
-        <li class="nav-item"><a href="#techstack" class="nav-link nav-tag" data-target="techstack">Kỹ năng</a></li>
-        <li class="nav-item"><a href="#pricing" class="nav-link nav-tag" data-target="pricing">Bảng giá</a></li>
-        <li class="nav-item"><a href="#demo" class="nav-link nav-tag" data-target="demo">Demo</a></li>
-        <li class="nav-item"><a href="#contact" class="nav-link nav-tag" data-target="contact">Liên hệ</a></li>
-      </ul>
-
-      <a href="#contact" class="btn btn-nav-cta">
-        Nhận báo giá <i class="bi bi-arrow-up-right"></i>
-      </a>
-    </div>
-  </div>
-</nav>
-
-<main>
+<?php
+  require_once('database/connect.php');
+  $sql = "SELECT p.*, c.name as category_name,
+               GROUP_CONCAT(t.name SEPARATOR ', ') as tech_list
+        FROM `projects` p 
+        LEFT JOIN `categories` c ON p.category_id = c.id 
+        LEFT JOIN `project_technology` pt ON p.id = pt.project_id
+        LEFT JOIN `technologies` t ON pt.technology_id = t.id
+        where p.is_featured = 1
+        GROUP BY p.id
+        ORDER BY p.id DESC";
+$projects = executeresult($sql);
+?>
+<?php include('fragment/header.php'); ?>
 <!-- ===================== HERO ===================== -->
 <section class="hero" id="home">
   <div class="container-xl">
     <div class="row align-items-center gy-5">
-      <div class="col-lg-6">
+      <div class="col-lg-8">
         <p class="eyebrow reveal-up">
           <span class="eyebrow__ping"></span>
           Đang nhận đồ án · học kỳ hiện tại
@@ -75,7 +36,7 @@
           <a href="#demo" class="btn btn-primary-grad">
             <i class="bi bi-play-circle-fill"></i> Xem demo sản phẩm
           </a>
-          <a href="#contact" class="btn btn-outline-ghost">
+          <a href="http://zalo.me/0944666371" class="btn btn-outline-ghost">
             Tư vấn nhanh qua Zalo
           </a>
         </div>
@@ -99,37 +60,15 @@
         </div>
       </div>
 
-      <div class="col-lg-6">
-        <!-- Signature element: fake IDE window with typing animation -->
-        <div class="ide reveal-up" style="--d:.15s">
-          <div class="ide__titlebar">
-            <div class="ide__dots"><span></span><span></span><span></span></div>
-            <div class="ide__tabs">
-              <div class="ide__tab is-active"><i class="bi bi-filetype-java"></i> DoAnTotNghiep.java</div>
-            </div>
-          </div>
-          <div class="ide__body">
-            <div class="ide__gutter">
-              <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>
-            </div>
-            <pre class="ide__code"><code id="typedCode"></code><span class="ide__cursor" id="ideCursor"></span></pre>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
-  <div class="scroll-hint" aria-hidden="true">
-    <span></span>
-    <p>cuộn xuống</p>
-  </div>
 </section>
 
 <!-- ===================== TECH & EXPERIENCE ===================== -->
 <section class="section" id="techstack">
   <div class="container-xl">
     <div class="section-head reveal-up">
-      <p class="section-tag">#kynang</p>
       <h2 class="section-title">Công nghệ &amp; kinh nghiệm triển khai</h2>
       <p class="section-desc">
         Hơn <strong class="text-white">5 năm đồng hành cùng sinh viên</strong> qua nhiều kỳ đồ án —
@@ -231,7 +170,6 @@
 <section class="section" id="pricing">
   <div class="container-xl">
     <div class="section-head reveal-up">
-      <p class="section-tag">#banggia</p>
       <h2 class="section-title">Bảng giá dịch vụ</h2>
       <p class="section-desc">
         Minh bạch theo từng nhu cầu — làm mới hoàn toàn theo đề bài riêng, hoặc chọn
@@ -241,6 +179,7 @@
 
     <div class="pricing-grid">
       <div class="price-card reveal-up">
+        <span class="price-card__ribbon">Bàn giao đúng hạn</span>
         <div class="price-card__head">
           <span class="price-card__badge">Đồ án tốt nghiệp / yêu cầu riêng</span>
           <h3>Làm mới theo yêu cầu</h3>
@@ -257,11 +196,11 @@
       </div>
 
       <div class="price-card price-card--highlight reveal-up" style="--d:.08s">
-        <span class="price-card__ribbon">Giao nhanh trong 24h</span>
+        <span class="price-card__ribbon">Giao nhanh trong 2h</span>
         <div class="price-card__head">
           <span class="price-card__badge">Deadline gấp / bài tập lớn</span>
           <h3>Web có sẵn (mẫu)</h3>
-          <p class="price-card__price">300.000đ <span>&mdash; 2.000.000đ</span></p>
+          <p class="price-card__price">300.000đ &mdash; 2.000.000đ</p>
         </div>
         <ul class="price-card__list">
           <li><i class="bi bi-check2"></i> Chọn từ kho project đã build sẵn, đa dạng đề tài</li>
@@ -295,8 +234,7 @@
 <section class="section section--alt" id="demo">
   <div class="container-xl">
     <div class="section-head reveal-up">
-      <p class="section-tag">#demo</p>
-      <h2 class="section-title">Demo sản phẩm đã triển khai</h2>
+      <h2 class="section-title">Demo sản phẩm mới và hot nhất</h2>
       <p class="section-desc">
         Một số đồ án tiêu biểu đã bàn giao. Video được cập nhật liên tục —
         tìm theo tên hoặc công nghệ bạn quan tâm.
@@ -304,24 +242,46 @@
     </div>
 
     <div class="demo-toolbar reveal-up">
-      <div class="demo-search">
-        <i class="bi bi-search"></i>
-        <input type="text" id="demoSearch" placeholder="Tìm theo tên đồ án, công nghệ... (VD: Spring Boot, quản lý)">
-      </div>
-      <div class="demo-filters" id="demoFilters">
-        <button class="filter-chip is-active" data-filter="all">Tất cả</button>
+      <div class="demo-filters" id="demoFilter">
+        <button class="filter-chip is-active" data-filter="all">Xem tất cả đồ án</button>
         <!-- filled by JS -->
       </div>
     </div>
-
-    <div class="demo-grid" id="demoGrid">
-      <!-- filled by JS -->
+    <?php if (empty($projects)): ?>
+      <div class="demo-empty d-none">
+        <i class="bi bi-emoji-frown"></i>
+        <p>Không tìm thấy demo phù hợp. Thử từ khóa khác nhé!</p>
+      </div>
+    <?php else: ?>
+      <div class="demo-grid" id="demoGrids">
+      <?php foreach ($projects as $p): ?>
+        <a href="project_detail?id=<?= (int)$p['id'] ?>" class="demo-card">
+          <div class="demo-card__thumb">
+            <?php if (!empty($p['banner'])): ?>
+                <img src="<?= htmlspecialchars($p['banner']) ?>" alt="<?= htmlspecialchars($p['title']) ?>" loading="lazy">
+            <?php else: ?>
+                <img src="image/logo.jpg" alt="<?= htmlspecialchars($p['title']) ?>" loading="lazy">
+            <?php endif; ?>
+            <div class="demo-card__play"></div>
+          </div>
+          <div class="demo-card__body">
+            <span class="demo-card__tag"><?= htmlspecialchars($p['category_name']) ?></span>
+            <h3 class="demo-card__title" style="color: #ffffff;"><?= htmlspecialchars($p['title']) ?></h3>
+            <div class="demo-card__techs">
+              <?php if (!empty($p['tech_list'])): ?>
+                  <?php foreach (explode(', ', $p['tech_list']) as $tech): ?>
+                      <span class="tech-pill"><?= htmlspecialchars($tech) ?></span>
+                  <?php endforeach; ?>
+              <?php else: ?>
+                  <span class="text-white small">Chưa chọn</span>
+              <?php endif; ?>
+            </div>
+            <p class="demo-card__meta"><i class="bi bi-patch-check-fill"></i> Kèm báo cáo &amp; video hướng dẫn</p>
+          </div>
+        </a>
+      <?php endforeach; ?>
     </div>
-
-    <div class="demo-empty d-none" id="demoEmpty">
-      <i class="bi bi-emoji-frown"></i>
-      <p>Không tìm thấy demo phù hợp. Thử từ khóa khác nhé!</p>
-    </div>
+    <?php endif; ?>
 
     <nav class="demo-pagination" id="demoPagination" aria-label="Phân trang demo"></nav>
   </div>
@@ -333,7 +293,6 @@
     <div class="contact-panel reveal-up">
       <div class="row g-0">
         <div class="col-lg-5 contact-panel__side">
-          <p class="section-tag">#lienhe</p>
           <h2 class="section-title section-title--sm">Sẵn sàng bắt đầu đồ án của bạn?</h2>
           <p class="section-desc">
             Gửi yêu cầu kèm đề bài / mô tả đồ án, mình sẽ phản hồi báo giá và thời gian
@@ -347,29 +306,25 @@
             </li>
             <li>
               <i class="bi bi-messenger"></i>
-              <div><span>Messenger</span><strong>Liên hệ</strong></div>
-            </li>
-            <li>
-              <i class="bi bi-envelope-fill"></i>
-              <div><span>Email</span><strong>contact@devhire.dev</strong></div>
+              <div><span>Messenger</span><a href="https://www.facebook.com/tranhieu.webapp" target="_blank">Click để liên hệ</a></div>
             </li>
           </ul>
         </div>
 
         <div class="col-lg-7 contact-panel__form">
-          <form id="contactForm" novalidate>
+          <form id="contactForm" action="api/contact_submit.php" method="POST" novalidate>
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Họ tên</label>
-                <input type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+                <input type="text" name="fullname" class="form-control" placeholder="Nguyễn Văn A" required>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Zalo / SĐT</label>
-                <input type="text" class="form-control" placeholder="09xx xxx xxx" required>
+                <input type="text" name="phone" class="form-control" placeholder="09xx xxx xxx" required>
               </div>
               <div class="col-12">
                 <label class="form-label">Công nghệ mong muốn</label>
-                <select class="form-select">
+                <select name="technology" class="form-select">
                   <option>Java / Spring Boot</option>
                   <option>Servlet / JSP</option>
                   <option>C# / .NET</option>
@@ -381,7 +336,7 @@
               </div>
               <div class="col-12">
                 <label class="form-label">Mô tả đồ án</label>
-                <textarea class="form-control" rows="4" placeholder="Đề bài, deadline, yêu cầu chức năng..."></textarea>
+                <textarea name="message" class="form-control" rows="4" placeholder="Đề bài, deadline, yêu cầu chức năng..."></textarea>
               </div>
               <div class="col-12">
                 <button type="submit" class="btn btn-primary-grad w-100">
@@ -396,57 +351,13 @@
     </div>
   </div>
 </section>
+
+
 </main>
+<?php include 'fragment/bottom-nav.php'; ?>
+<?php include('fragment/footer.php'); ?>
 
-<!-- ===================== FOOTER ===================== -->
-<footer class="site-footer">
-  <div class="container-xl">
-    <div class="footer-top">
-      <a href="#home" class="brand">
-        <span class="brand__bracket">&lt;/&gt;</span>
-        <span class="brand__text">DevHire<span class="brand__dot">.</span></span>
-      </a>
-      <ul class="footer-nav">
-        <li><a href="#home">#trangchu</a></li>
-        <li><a href="#techstack">#kynang</a></li>
-        <li><a href="#pricing">#banggia</a></li>
-        <li><a href="#demo">#demo</a></li>
-        <li><a href="#contact">#lienhe</a></li>
-      </ul>
-      <div class="footer-social">
-        <a href="#" aria-label="Messenger"><i class="bi bi-messenger"></i></a>
-        <a href="#" aria-label="Zalo"><i class="bi bi-chat-dots-fill"></i></a>
-        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-        <a href="#" aria-label="Youtube"><i class="bi bi-youtube"></i></a>
-      </div>
-    </div>
-    <hr class="footer-divider">
-    <div class="footer-bottom">
-      <p>© <span id="year"></span> DevHire. Dịch vụ code thuê đồ án — build với tinh thần dev thật sự.</p>
-      <p class="footer-bottom__meta">Made with <i class="bi bi-suit-heart-fill"></i> &amp; nhiều cà phê.</p>
-    </div>
-  </div>
-</footer>
-
-<!-- ===================== FLOATING CHAT BUTTON ===================== -->
-<div class="chat-widget" id="chatWidget">
-  <div class="chat-widget__panel" id="chatPanel">
-    <a href="https://m.me/your.page" target="_blank" rel="noopener" class="chat-option chat-option--messenger">
-      <i class="bi bi-messenger"></i>
-      <span>Nhắn Messenger</span>
-    </a>
-    <a href="https://zalo.me/0900000000" target="_blank" rel="noopener" class="chat-option chat-option--zalo">
-      <i class="bi bi-chat-dots-fill"></i>
-      <span>Nhắn Zalo</span>
-    </a>
-  </div>
-  <button class="chat-widget__btn" id="chatToggle" aria-label="Mở khung chat" aria-expanded="false">
-    <span class="chat-widget__ring"></span>
-    <i class="bi bi-chat-dots-fill icon-chat"></i>
-    <i class="bi bi-x-lg icon-close"></i>
-  </button>
-</div>
-
+<?php include('fragment/chat.php'); ?>
 <!-- Bootstrap JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script src="js/script.js"></script>

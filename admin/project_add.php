@@ -12,6 +12,32 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 require_once('../database/connect.php'); // Nạp file kết nối và các hàm xử lý dữ liệu
 require_once('config/config.php'); // Nạp cấu hình Cloudinary SDK ($cloudinary, $uploadFolder)
 
+
+// Upload banner riêng cho đồ án (ảnh đại diện lớn hiển thị đầu trang)
+$banner_url = null;
+if (!empty($_FILES['bannerFile']['name'])) {
+    $bannerFilesArray = [
+        'name'     => [$_FILES['bannerFile']['name']],
+        'type'     => [$_FILES['bannerFile']['type']],
+        'tmp_name' => [$_FILES['bannerFile']['tmp_name']],
+        'error'    => [$_FILES['bannerFile']['error']],
+        'size'     => [$_FILES['bannerFile']['size']],
+    ];
+    $bannerUploadResults = cloudinaryUploadFilesConcurrently(
+        $bannerFilesArray,
+        $cloudinaryCloudName,
+        $cloudinaryApiKey,
+        $cloudinaryApiSecret,
+        $uploadFolder,
+        ['project_banner']
+    );
+    if (!empty($bannerUploadResults[0]['success'])) {
+        $banner_url = $bannerUploadResults[0]['secure_url'];
+    } else {
+        $upload_errors[] = "Lỗi upload banner: " . $bannerUploadResults[0]['error'];
+    }
+}
+
 // 2. Xử lý API bằng PHP khi Admin bấm Lưu (Nhận FormData)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api'] === 'save') {
     header('Content-Type: application/json; charset=UTF-8');
@@ -22,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
     $description = trim($_POST['description'] ?? ''); // Nhận code HTML từ TinyMCE
     $youtube_id = trim($_POST['youtube_id'] ?? '');
     $drive_link = trim($_POST['drive_link'] ?? '');
+    $is_featured = (isset($_POST['is_featured']) && $_POST['is_featured'] == '1') ? 1 : 0;
     
     // Nhận mảng dữ liệu chọn từ Form
     $tech_ids = $_POST['tech_ids'] ?? []; // Bản chất truyền từ FormData qua mảng
@@ -63,8 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['api']) && $_GET['api']
     $db_category_id = !empty($category_id) ? (int)$category_id : 'NULL';
 
     // BƯỚC 1: Thêm vào bảng chính projects
-    $sql_project = "INSERT INTO `projects` (`category_id`, `title`, `description`, `youtube_id`, `drive_link`) 
-                    VALUES ($db_category_id, '$safe_title', '$safe_description', '$safe_youtube_id', '$safe_drive_link')";
+    $db_banner = $banner_url ? "'" . addslashes($banner_url) . "'" : 'NULL';
+
+    $sql_project = "INSERT INTO `projects` (`category_id`, `title`, `description`, `youtube_id`, `drive_link`, `is_featured`, `banner`) 
+                    VALUES ($db_category_id, '$safe_title', '$safe_description', '$safe_youtube_id', '$safe_drive_link', $is_featured, $db_banner)";
     $project_id = insert($sql_project);
 
     if ($project_id > 0) {
@@ -136,11 +165,11 @@ $technologies = executeresult("SELECT * FROM `technologies` ORDER BY `name` ASC"
     <form id="addProjectForm">
         <div class="card card-custom p-4 mb-4">
             <div class="row">
-                <div class="col-md-8 mb-3">
+                <div class="col-md-8">
                     <label for="title" class="form-label">Tên đồ án <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="title" required placeholder="Ví dụ: Website E-Learner học trực tuyến">
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-4">
                     <label for="category_id" class="form-label">Danh mục chính</label>
                     <select class="form-select" id="category_id">
                         <option value="">-- Chọn danh mục --</option>
@@ -149,8 +178,18 @@ $technologies = executeresult("SELECT * FROM `technologies` ORDER BY `name` ASC"
                         <?php endforeach; ?>
                     </select>
                 </div>
+                <div class="col-md-12 mb-3">
+                    <label class="form-label d-block">&ThinSpace;</label>
+                    <div class="form-check form-switch fs-5">
+                        <input class="form-check-input" type="checkbox" role="switch" id="is_featured" name="is_featured" value="1"
+                            checked>
+                        <label class="form-check-label" for="is_featured" id="toggle-label">
+                            Đồ án nổi bật
+                        </label>
+                    </div>
+                </div>
             </div>
-
+            
             <!-- Trình soạn thảo mô tả chi tiết TinyMCE -->
             <div class="mb-3">
                 <label for="description" class="form-label">Mô tả tính năng chi tiết</label>
@@ -167,7 +206,13 @@ $technologies = executeresult("SELECT * FROM `technologies` ORDER BY `name` ASC"
                     <input type="url" class="form-control" id="drive_link" placeholder="https://drive.google.com/...">
                 </div>
             </div>
-
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="bannerFile" class="form-label">Ảnh banner đại diện (hiển thị đầu trang)</label>
+                    <input class="form-control" type="file" id="bannerFile" accept="image/*">
+                    <div class="mt-2" id="bannerPreview"></div>
+                </div>
+            </div>
             <!-- Công nghệ sử dụng -->
             <div class="mb-4">
                 <label class="form-label mb-2">Các công nghệ chi tiết sử dụng</label>
@@ -221,7 +266,19 @@ tinymce.init({
     toolbar: 'undo redo | blocks | bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table code',
     placeholder: 'Nhập nội dung mô tả đồ án chi tiết tại đây...'
 });
-
+// Xem trước ảnh banner khi chọn
+document.getElementById('bannerFile').addEventListener('change', function () {
+    const preview = document.getElementById('bannerPreview');
+    preview.innerHTML = '';
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width:200px;max-height:120px;border-radius:6px;object-fit:cover;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
 // 2. Đón sự kiện Submit Form
 document.getElementById('addProjectForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -242,6 +299,8 @@ document.getElementById('addProjectForm').addEventListener('submit', async funct
         formData.append('description', tinymce.get('description').getContent()); // Lấy nội dung TinyMCE
         formData.append('youtube_id', document.getElementById('youtube_id').value);
         formData.append('drive_link', document.getElementById('drive_link').value);
+        const isFeatured = document.getElementById('is_featured').checked ? 1 : 0;
+        formData.append('is_featured', isFeatured);
 
         // Duyệt gắn các công nghệ được checked vào mảng FormData
         const checkedTechs = document.querySelectorAll('.tech-checkbox:checked');
@@ -255,7 +314,10 @@ document.getElementById('addProjectForm').addEventListener('submit', async funct
         for (let i = 0; i < files.length; i++) {
             formData.append('imageFiles[]', files[i]); // Thêm mảng file gửi lên PHP
         }
-
+        const bannerFile = document.getElementById('bannerFile').files[0];
+        if (bannerFile) {
+            formData.append('bannerFile', bannerFile);
+        }
         // Thực hiện lệnh AJAX POST sang endpoint PHP
         const response = await fetch('project_add.php?api=save', {
             method: 'POST',

@@ -230,3 +230,10 @@ body {
     .admin-topbar { display: flex; }
     body.admin-sidebar-open .admin-sidebar-overlay { display: block; }
 }
+.linkyoutube{
+    overflow: hidden;
+   display: -webkit-box;
+   -webkit-line-clamp: 2; /* number of lines to show */
+           line-clamp: 2; 
+   -webkit-box-orient: vertical;
+}

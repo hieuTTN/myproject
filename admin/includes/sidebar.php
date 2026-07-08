@@ -19,10 +19,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 // Danh sách menu — chỉ cần thêm 1 dòng ở đây nếu sau này có thêm trang admin mới
 $menu_items = [
+    ['file' => '../', 'icon' => 'bi-speedometer2',   'label' => 'Trang chủ'],
     ['file' => 'admin_dashboard.php', 'icon' => 'bi-grid-1x2-fill',   'label' => 'Quản lý đồ án'],
+    ['file' => 'account.php', 'icon' => 'bi-people-fill', 'label' => 'Tài khoản Admin'],
     ['file' => 'project_add.php',     'icon' => 'bi-plus-circle-fill','label' => 'Thêm đồ án'],
     ['file' => 'technology.php',      'icon' => 'bi-cpu-fill',        'label' => 'Công nghệ'],
     ['file' => 'category.php',        'icon' => 'bi-folder-fill',     'label' => 'Danh mục'],
+    ['file' => 'contact.php',         'icon' => 'bi-envelope-fill',   'label' => 'Liên hệ'],
     ['file' => 'cloudkey.php',        'icon' => 'bi-key-fill',        'label' => 'Cloud Key'],
 ];
 ?>

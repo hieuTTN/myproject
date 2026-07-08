@@ -69,3 +69,22 @@ CREATE TABLE `cloudinary_accounts` (
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `uniq_cloud_name` (`cloud_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `contacts` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `fullname` VARCHAR(100) NOT NULL,
+  `phone` VARCHAR(50) NOT NULL,
+  `technology` VARCHAR(100) DEFAULT NULL,
+  `message` TEXT DEFAULT NULL,
+  `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_is_read` (`is_read`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `projects`
+  ADD FULLTEXT INDEX `ft_title_description` (`title`, `description`);
+ 
+-- Kiểm tra lại xem index đã được tạo thành công chưa
+SHOW INDEX FROM `projects` WHERE Key_name = 'ft_title_description';
+
+ALTER TABLE `projects` ADD COLUMN `banner` VARCHAR(500) DEFAULT NULL AFTER `drive_link`;

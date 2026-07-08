@@ -10,6 +10,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 }
 
 require_once('../database/connect.php');
+require_once('includes/csrf.php');
 
 /**
  * Chuyển tên tiếng Việt có dấu thành slug không dấu, chỉ gồm a-z, 0-9 và dấu gạch ngang.
@@ -36,6 +37,11 @@ function slugify_vn($str) {
 
 // 2. XỬ LÝ THÊM DANH MỤC MỚI
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
+    if (!csrf_verify($_POST['csrf_token'] ?? '')) {
+        header("Location: category.php?msg=invalid_token");
+        exit;
+    }
+
     $name = trim($_POST['name'] ?? '');
     $slug = trim($_POST['slug'] ?? '');
     if ($slug === '') $slug = slugify_vn($name);
@@ -61,6 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // 3. XỬ LÝ CẬP NHẬT DANH MỤC
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit') {
+    if (!csrf_verify($_POST['csrf_token'] ?? '')) {
+        header("Location: category.php?msg=invalid_token");
+        exit;
+    }
+
     $edit_id = (int)($_POST['id'] ?? 0);
     $name = trim($_POST['name'] ?? '');
     $slug = trim($_POST['slug'] ?? '');
@@ -87,6 +98,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // 4. XỬ LÝ XÓA DANH MỤC (?action=delete&id=...)
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+    if (!csrf_verify($_GET['csrf_token'] ?? '')) {
+        header("Location: category.php?msg=invalid_token");
+        exit;
+    }
+
     $delete_id = (int)$_GET['id'];
     // categories.id được projects.category_id tham chiếu với ON DELETE SET NULL
     // nên xóa danh mục an toàn, các đồ án liên quan sẽ tự chuyển về "Chưa phân loại"
@@ -153,6 +169,10 @@ $categories = executeresult(
                         <div class="alert alert-danger bg-opacity-10 bg-danger text-danger border-danger border-opacity-20 small py-2 mb-4" role="alert">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>Vui lòng nhập đầy đủ tên danh mục!
                         </div>
+                    <?php elseif ($_GET['msg'] === 'invalid_token'): ?>
+                        <div class="alert alert-danger bg-opacity-10 bg-danger text-danger border-danger border-opacity-20 small py-2 mb-4" role="alert">
+                            <i class="bi bi-shield-exclamation me-2"></i>Phiên làm việc đã hết hạn hoặc yêu cầu không hợp lệ, vui lòng thử lại!
+                        </div>
                     <?php endif; ?>
                 <?php endif; ?>
 
@@ -162,6 +182,7 @@ $categories = executeresult(
                         <div class="card card-custom p-4">
                             <h3 class="fs-6 fw-bold mb-3"><i class="bi bi-plus-circle-fill text-teal me-2"></i>Thêm danh mục mới</h3>
                             <form method="POST" action="category.php" id="addCategoryForm">
+                                <?= csrf_field() ?>
                                 <input type="hidden" name="action" value="add">
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Tên danh mục</label>
@@ -216,7 +237,7 @@ $categories = executeresult(
                                                                 data-slug="<?= htmlspecialchars($cat['slug'], ENT_QUOTES) ?>">
                                                             <i class="bi bi-pencil-square"></i> Sửa
                                                         </button>
-                                                        <a href="category.php?action=delete&id=<?= $cat['id'] ?>"
+                                                        <a href="category.php?action=delete&id=<?= $cat['id'] ?>&csrf_token=<?= urlencode(csrf_token()) ?>"
                                                            class="btn btn-sm btn-outline-danger"
                                                            onclick="return confirm('Xóa danh mục &quot;<?= htmlspecialchars($cat['name'], ENT_QUOTES) ?>&quot;? Các đồ án đang thuộc danh mục này sẽ chuyển về \'Chưa phân loại\'.');">
                                                             <i class="bi bi-trash3"></i> Xóa
@@ -242,6 +263,7 @@ $categories = executeresult(
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-transparent border-0">
             <form method="POST" action="category.php" class="card card-custom p-4">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="edit">
                 <input type="hidden" name="id" id="edit_id">
 
